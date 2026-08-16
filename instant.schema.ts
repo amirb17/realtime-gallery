@@ -11,8 +11,9 @@ const schema = i.schema({
     reactions: i.entity({
       imageId: i.string().indexed(),
       emoji: i.string(),
+      userId: i.string().indexed(),
       createdAt: i.date(),
-    }),
+  }),
 
     activities: i.entity({
       imageId: i.string().indexed(),
