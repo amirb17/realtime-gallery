@@ -1,19 +1,49 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useImages } from "./hooks/useImages";
 import ImageGrid from "./components/gallery/ImageGrid";
 import ImageViewer from "./components/gallery/ImageViewer";
+
 
 function App() {
   const [selectedImageId, setSelectedImageId] = useState<string | null>(
     null,
   );
 
-  const {
-    data: images,
-    isLoading,
-    isError,
-    error,
-  } = useImages();
+const {
+  data,
+  isLoading,
+  isError,
+  error,
+  fetchNextPage,
+  hasNextPage,
+  isFetchingNextPage,
+} = useImages();
+
+const images = data?.pages.flatMap((page) => page) ?? [];
+
+useEffect(() => {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      if (
+        entries[0].isIntersecting &&
+        hasNextPage &&
+        !isFetchingNextPage
+      ) {
+        fetchNextPage();
+      }
+    },
+  );
+
+  const target = document.querySelector("#load-more");
+
+  if (target) {
+    observer.observe(target);
+  }
+
+  return () => {
+    observer.disconnect();
+  };
+}, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   if (isLoading) {
     return (
@@ -24,12 +54,17 @@ function App() {
   }
 
   if (isError) {
-    return (
-      <main className="p-8">
-        <p>Error: {error.message}</p>
-      </main>
-    );
-  }
+  return (
+    <main className="p-8">
+      <p>
+        Error:{" "}
+        {error instanceof Error
+          ? error.message
+          : "Something went wrong"}
+      </p>
+    </main>
+  );
+}
 
   const selectedImage = images?.find(
     (image) => image.id === selectedImageId,
@@ -52,6 +87,7 @@ function App() {
           onClose={() => setSelectedImageId(null)}
         />
       )}
+      <div id="load-more" className="h-10" />
     </main>
   );
 }

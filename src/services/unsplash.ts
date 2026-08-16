@@ -2,13 +2,16 @@ import type {
   GalleryImage,
   UnsplashImage,
 } from "../types/types";
+
 const UNSPLASH_API_URL = "https://api.unsplash.com/photos";
 
-export const getImages = async (): Promise<GalleryImage[]> => {
+export const getImages = async (
+  page: number,
+): Promise<GalleryImage[]> => {
   const accessKey = import.meta.env.VITE_UNSPLASH_ACCESS_KEY;
 
   const response = await fetch(
-    `${UNSPLASH_API_URL}?page=1&per_page=20&client_id=${accessKey}`,
+    `${UNSPLASH_API_URL}?page=${page}&per_page=20&client_id=${accessKey}`,
   );
 
   if (!response.ok) {
