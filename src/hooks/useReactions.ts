@@ -31,20 +31,11 @@ export const useReactions = (imageId: string) => {
   const reactions = data?.reactions ?? [];
 
   const addReaction = async (emoji: string) => {
-    const existingReaction = reactions.find(
-      (reaction) =>
-        reaction.emoji === emoji &&
-        reaction.userId === userId,
-    );
+  const existingReaction = reactions.find(
+    (reaction) => reaction.userId === userId,
+  );
 
-    if (existingReaction) {
-      await db.transact(
-        db.tx.reactions[existingReaction.id].delete(),
-      );
-
-      return;
-    }
-
+  if (!existingReaction) {
     await db.transact(
       db.tx.reactions[id()].create({
         imageId,
@@ -53,7 +44,28 @@ export const useReactions = (imageId: string) => {
         createdAt: new Date(),
       }),
     );
-  };
+
+    return;
+  }
+
+  if (existingReaction.emoji === emoji) {
+    await db.transact(
+      db.tx.reactions[existingReaction.id].delete(),
+    );
+
+    return;
+  }
+
+  await db.transact([
+    db.tx.reactions[existingReaction.id].delete(),
+    db.tx.reactions[id()].create({
+      imageId,
+      emoji,
+      userId,
+      createdAt: new Date(),
+    }),
+  ]);
+};
 
   const reactionCounts = reactions.reduce<Record<string, number>>(
     (counts, reaction) => {
