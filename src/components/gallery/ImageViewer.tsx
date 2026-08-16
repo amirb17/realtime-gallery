@@ -1,3 +1,4 @@
+import ReactionBar from "./ReactionBar";
 import type { ImageViewerProps } from "../../types/types";
 import { useComments } from "../../hooks/useComments";
 
@@ -43,7 +44,7 @@ const ImageViewer = ({ image, onClose }: ImageViewerProps) => {
             {image.description}
           </p>
         )}
-
+        <ReactionBar imageId={image.id} />
         <div className="border-t p-4">
           <h2 className="mb-3 text-lg font-semibold">
             Comments
