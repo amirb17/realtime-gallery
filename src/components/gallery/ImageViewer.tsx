@@ -9,6 +9,8 @@ const ImageViewer = ({ image, onClose }: ImageViewerProps) => {
     commentText,
     setCommentText,
     addComment,
+    deleteComment,
+    userId,
   } = useComments(image.id);
 
   const handleSubmit = async () => {
@@ -59,14 +61,24 @@ const ImageViewer = ({ image, onClose }: ImageViewerProps) => {
           )}
 
           <div className="mb-4 space-y-2">
-            {comments.map((comment) => (
-              <div
-                key={comment.id}
-                className="rounded bg-gray-100 p-2"
-              >
-                {comment.text}
-              </div>
-            ))}
+          {comments.map((comment) => (
+            <div
+              key={comment.id}
+              className="flex items-center justify-between rounded bg-gray-100 p-2"
+        >
+          <span>{comment.text}</span>
+
+        {comment.userId === userId && (
+          <button
+            type="button"
+            onClick={() => deleteComment(comment.id)}
+            className="ml-3 text-sm text-red-600 hover:underline"
+          >
+            Delete
+          </button>
+        )}
+      </div>
+    ))}
           </div>
 
           <div className="flex gap-2">
