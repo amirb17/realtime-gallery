@@ -1,29 +1,28 @@
-import { useEffect, useRef, useState } from "react";
+import ActivityFeed from "./components/activity/ActivityFeed";
+import { useEffect, useState } from "react";
 import { useImages } from "./hooks/useImages";
 import ImageGrid from "./components/gallery/ImageGrid";
 import ImageViewer from "./components/gallery/ImageViewer";
-
 
 function App() {
   const [selectedImageId, setSelectedImageId] = useState<string | null>(
     null,
   );
 
-const {
-  data,
-  isLoading,
-  isError,
-  error,
-  fetchNextPage,
-  hasNextPage,
-  isFetchingNextPage,
-} = useImages();
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useImages();
 
-const images = data?.pages.flatMap((page) => page) ?? [];
+  const images = data?.pages.flatMap((page) => page) ?? [];
 
-useEffect(() => {
-  const observer = new IntersectionObserver(
-    (entries) => {
+  useEffect(() => {
+    const observer = new IntersectionObserver((entries) => {
       if (
         entries[0].isIntersecting &&
         hasNextPage &&
@@ -31,19 +30,18 @@ useEffect(() => {
       ) {
         fetchNextPage();
       }
-    },
-  );
+    });
 
-  const target = document.querySelector("#load-more");
+    const target = document.querySelector("#load-more");
 
-  if (target) {
-    observer.observe(target);
-  }
+    if (target) {
+      observer.observe(target);
+    }
 
-  return () => {
-    observer.disconnect();
-  };
-}, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+    return () => {
+      observer.disconnect();
+    };
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   if (isLoading) {
     return (
@@ -54,32 +52,54 @@ useEffect(() => {
   }
 
   if (isError) {
-  return (
-    <main className="p-8">
-      <p>
-        Error:{" "}
-        {error instanceof Error
-          ? error.message
-          : "Something went wrong"}
-      </p>
-    </main>
-  );
-}
+    return (
+      <main className="p-8">
+        <p>
+          Error:{" "}
+          {error instanceof Error
+            ? error.message
+            : "Something went wrong"}
+        </p>
+      </main>
+    );
+  }
 
-  const selectedImage = images?.find(
+  const selectedImage = images.find(
     (image) => image.id === selectedImageId,
   );
 
   return (
-    <main className="min-h-screen p-8">
-      <h1 className="mb-8 text-3xl font-bold">
+    <main className="min-h-screen bg-gray-50 p-6">
+      <h1 className="mb-6 text-3xl font-bold">
         Realtime Gallery
       </h1>
 
-      <ImageGrid
-        images={images ?? []}
-        onImageClick={setSelectedImageId}
-      />
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[7fr_3fr]">
+        {/* Gallery - 70% */}
+        <section>
+          <ImageGrid
+            images={images}
+            onImageClick={setSelectedImageId}
+          />
+
+          {/* Infinite scroll trigger */}
+          <div
+            id="load-more"
+            className="h-10"
+          />
+
+          {isFetchingNextPage && (
+            <p className="py-4 text-center text-gray-500">
+              Loading more images...
+            </p>
+          )}
+        </section>
+
+        {/* Activity Feed - 30% */}
+        <aside className="lg:sticky lg:top-6 lg:h-[calc(100vh-6rem)] lg:overflow-y-auto">
+          <ActivityFeed />
+        </aside>
+      </div>
 
       {selectedImage && (
         <ImageViewer
@@ -87,7 +107,6 @@ useEffect(() => {
           onClose={() => setSelectedImageId(null)}
         />
       )}
-      <div id="load-more" className="h-10" />
     </main>
   );
 }

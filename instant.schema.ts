@@ -4,16 +4,17 @@ const schema = i.schema({
   entities: {
     comments: i.entity({
       imageId: i.string().indexed(),
+      userId: i.string().optional().indexed(),
       text: i.string(),
       createdAt: i.date(),
-    }),
+}),
 
     reactions: i.entity({
       imageId: i.string().indexed(),
       emoji: i.string(),
-      userId: i.string().indexed(),
+      userId: i.string().optional().indexed(),
       createdAt: i.date(),
-  }),
+}),
 
     activities: i.entity({
       imageId: i.string().indexed(),

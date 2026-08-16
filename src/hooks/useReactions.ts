@@ -36,14 +36,21 @@ export const useReactions = (imageId: string) => {
   );
 
   if (!existingReaction) {
-    await db.transact(
-      db.tx.reactions[id()].create({
-        imageId,
-        emoji,
-        userId,
-        createdAt: new Date(),
-      }),
-    );
+    await db.transact([
+  db.tx.reactions[id()].create({
+    imageId,
+    emoji,
+    userId,
+    createdAt: new Date(),
+  }),
+
+  db.tx.activities[id()].create({
+    imageId,
+    type: "reaction",
+    emoji,
+    createdAt: new Date(),
+  }),
+]);
 
     return;
   }
@@ -56,15 +63,23 @@ export const useReactions = (imageId: string) => {
     return;
   }
 
-  await db.transact([
-    db.tx.reactions[existingReaction.id].delete(),
-    db.tx.reactions[id()].create({
-      imageId,
-      emoji,
-      userId,
-      createdAt: new Date(),
-    }),
-  ]);
+ await db.transact([
+  db.tx.reactions[existingReaction.id].delete(),
+
+  db.tx.reactions[id()].create({
+    imageId,
+    emoji,
+    userId,
+    createdAt: new Date(),
+  }),
+
+  db.tx.activities[id()].create({
+    imageId,
+    type: "reaction",
+    emoji,
+    createdAt: new Date(),
+  }),
+]);
 };
 
   const reactionCounts = reactions.reduce<Record<string, number>>(
