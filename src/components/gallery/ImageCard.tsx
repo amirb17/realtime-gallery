@@ -1,4 +1,5 @@
 import type { ImageCardProps } from "../../types/types";
+import ReactionBar from "./ReactionBar";
 
 const ImageCard = ({ image, onClick }: ImageCardProps) => {
   return (
@@ -17,6 +18,8 @@ const ImageCard = ({ image, onClick }: ImageCardProps) => {
           {image.description}
         </p>
       )}
+
+      <ReactionBar imageId={image.id} />
     </article>
   );
 };
