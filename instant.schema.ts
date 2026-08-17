@@ -15,14 +15,15 @@ const schema = i.schema({
       userId: i.string().optional().indexed(),
       createdAt: i.date(),
 }),
-
-    activities: i.entity({
-      imageId: i.string().indexed(),
-      type: i.string(),
-      emoji: i.string().optional(),
-      text: i.string().optional(),
-      createdAt: i.date(),
-    }),
+activities: i.entity({
+  imageId: i.string().indexed(),
+  type: i.string(),
+  emoji: i.string().optional(),
+  text: i.string().optional(),
+  userId: i.string().optional().indexed(),
+  userName: i.string().optional(),
+  createdAt: i.date(),
+}),
   },
 });
 

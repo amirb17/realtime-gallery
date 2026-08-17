@@ -1,6 +1,8 @@
 import { id } from "@instantdb/react";
 import { db } from "../lib/instant";
 
+const USER_NAME_KEY = "gallery-user-name";
+
 const getUserId = () => {
   const existingUserId = localStorage.getItem("gallery-user-id");
 
@@ -17,7 +19,7 @@ const getUserId = () => {
 
 export const useReactions = (imageId: string) => {
   const userId = getUserId();
-
+  const userName = localStorage.getItem(USER_NAME_KEY) ?? "Someone";
   const { data, isLoading, error } = db.useQuery({
     reactions: {
       $: {
@@ -44,12 +46,14 @@ export const useReactions = (imageId: string) => {
     createdAt: new Date(),
   }),
 
-  db.tx.activities[id()].create({
-    imageId,
-    type: "reaction",
-    emoji,
-    createdAt: new Date(),
-  }),
+ db.tx.activities[id()].create({
+  imageId,
+  type: "reaction",
+  emoji,
+  userId,
+  userName,
+  createdAt: new Date(),
+}),
 ]);
 
     return;
@@ -77,6 +81,8 @@ export const useReactions = (imageId: string) => {
     imageId,
     type: "reaction",
     emoji,
+    userId,
+    userName,
     createdAt: new Date(),
   }),
 ]);

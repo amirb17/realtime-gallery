@@ -1,3 +1,5 @@
+import UserSetup from "./components/user/UserSetup";
+import { useUserIdentity } from "./hooks/useUserIdentity";
 import { useAppStore } from "./store/appStore";
 import ActivityFeed from "./components/activity/ActivityFeed";
 import { useEffect } from "react";
@@ -6,6 +8,9 @@ import ImageGrid from "./components/gallery/ImageGrid";
 import ImageViewer from "./components/gallery/ImageViewer";
 
 function App() {
+    const { userName } = useUserIdentity();
+
+  
     const {
     selectedImageId,
     isViewerOpen,
@@ -13,6 +18,7 @@ function App() {
     setViewerOpen,
   } = useAppStore();
 
+  
   const {
     data,
     isLoading,
@@ -22,6 +28,7 @@ function App() {
     hasNextPage,
     isFetchingNextPage,
   } = useImages();
+
 
   const images = data?.pages.flatMap((page) => page) ?? [];
 
@@ -46,7 +53,9 @@ function App() {
       observer.disconnect();
     };
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
-
+    if (!userName) {
+    return <UserSetup />;
+  }
   if (isLoading) {
     return (
       <main className="p-8">

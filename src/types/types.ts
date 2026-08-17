@@ -36,3 +36,14 @@ export type ImageViewerProps = {
   image: GalleryImage;
   onClose: () => void;
 };
+
+export type Activity = {
+  id: string;
+  imageId: string;
+  type: string;
+  emoji?: string;
+  text?: string;
+  userId?: string;
+  userName?: string;
+  createdAt: Date;
+};

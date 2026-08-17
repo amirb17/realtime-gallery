@@ -29,14 +29,14 @@ const ActivityFeed = () => {
           >
             {activity.type === "reaction" && (
               <p>
-                Someone reacted {activity.emoji} to an image.
+                {activity.userName ?? "Someone"} reacted {activity.emoji} to an image.
+                
               </p>
             )}
 
             {activity.type === "comment" && (
               <p>
-                Someone commented: "{activity.text}"
-              </p>
+              {activity.userName ?? "Someone"} commented: "{activity.text}"              </p>
             )}
           </div>
         ))}
