@@ -57,7 +57,7 @@ function App() {
 
   if (isLoading) {
     return (
-      <main className="p-8">
+      <main className="flex min-h-screen items-center justify-center">
         <p>Loading images...</p>
       </main>
     );
@@ -65,7 +65,7 @@ function App() {
 
   if (isError) {
     return (
-      <main className="p-8">
+      <main className="flex min-h-screen items-center justify-center">
         <p>
           Error:{" "}
           {error instanceof Error
@@ -81,13 +81,32 @@ function App() {
   );
 
   return (
-    <main className="min-h-screen bg-gray-50 p-6">
-      <h1 className="mb-6 text-3xl font-bold">
-        Realtime Gallery
-      </h1>
+    <main className="h-screen overflow-hidden bg-gray-50">
+      {/* Header */}
+      <header className="flex h-24 shrink-0 items-center justify-center border-b border-gray-200 bg-white">
+        <h1 className="text-4xl font-black tracking-tight text-gray-950">
+          Realtime Gallery
+        </h1>
+      </header>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[7fr_3fr]">
-        <section>
+      {/* Main workspace */}
+      <div className="relative h-[calc(100vh-6rem)]">
+        {/* Gallery */}
+        <section
+          className="
+            h-[72%]
+            overflow-y-auto
+            px-3
+            py-4
+            sm:px-6
+            sm:py-6
+
+            lg:h-full
+            lg:w-[70%]
+            lg:px-6
+            lg:py-6
+          "
+        >
           <ImageGrid
             images={images}
             onImageClick={(imageId) => {
@@ -105,11 +124,51 @@ function App() {
           )}
         </section>
 
-        <aside className="lg:sticky lg:top-6 lg:h-[calc(100vh-6rem)] lg:overflow-y-auto">
+        {/* Desktop Activity Feed */}
+        <aside
+          className="
+            hidden
+
+            lg:fixed
+            lg:right-0
+            lg:top-24
+            lg:block
+            lg:h-[calc(100vh-6rem)]
+            lg:w-[30%]
+            lg:overflow-hidden
+            lg:px-6
+            lg:py-6
+          "
+        >
+          <ActivityFeed />
+        </aside>
+
+        {/* Mobile Activity Feed */}
+        <aside
+          className="
+            fixed
+            bottom-0
+            left-0
+            z-40
+            block
+            h-[28%]
+            w-full
+            overflow-hidden
+            border-t
+            border-gray-200
+            bg-gray-50
+            px-3
+            py-3
+            shadow-[0_-4px_20px_rgba(0,0,0,0.08)]
+
+            lg:hidden
+          "
+        >
           <ActivityFeed />
         </aside>
       </div>
 
+      {/* Image Viewer */}
       {selectedImage && isViewerOpen && (
         <ImageViewer
           image={selectedImage}
