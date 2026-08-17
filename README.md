@@ -1,58 +1,169 @@
 # Realtime Gallery
 
-A multi-user real-time image interaction application built with React, TypeScript, Tailwind CSS, React Query, and InstantDB.
+A multi-user real-time image interaction application built with **React, TypeScript, Tailwind CSS, TanStack React Query, Zustand, and InstantDB**.
 
-The application allows users to browse an image gallery, open focused image views, add emoji reactions, post comments, and see interactions synchronize in real time across multiple users. A global activity feed displays interactions happening across the gallery.
+The application allows users to browse an image gallery powered by the Unsplash API, open focused image views, react with emojis, post comments, and see interactions synchronized in real time. A global activity feed displays reactions and comments from users across the gallery.
+
+## Live Demo
+
+## Live Demo
+
+🚀 **[Open Realtime Gallery](https://realtime-gallery-nine.vercel.app/)**
+
+A live deployment of the application running on Vercel.
 
 ## Features
 
 * Image gallery powered by the Unsplash API
 * Responsive image grid
-* Infinite scrolling with React Query
-* Focused image viewer
-* Emoji reactions on images
-* One reaction per user per image
+* Infinite scrolling using TanStack React Query
+* Focused image viewer with modal-style presentation
+* Emoji picker for reactions
+* One active reaction per user per image
 * Clicking the same reaction removes it
 * Selecting a different reaction replaces the previous reaction
 * Real-time reaction synchronization with InstantDB
 * Real-time comments
 * Users can delete their own comments
+* First-name user setup before entering the gallery
+* Browser-based user identity using a generated user ID
+* Activity feed displays the user's name for reactions and comments
 * Global real-time activity feed
-* Activity feed displays reactions and comments from across the gallery
-* Gallery and activity feed have independent scrolling
+* Independent scrolling for gallery and activity feed
 * Loading and error states
-* Two-tab testing for real-time synchronization
+* Multi-tab real-time synchronization testing
 
 ## Tech Stack
 
-* React
-* TypeScript
-* Vite
-* Tailwind CSS
-* TanStack React Query
-* InstantDB
-* Unsplash API
-* Zustand
-* Git & GitHub
+| Technology           | Purpose                                          |
+| -------------------- | ------------------------------------------------ |
+| React                | UI and component architecture                    |
+| TypeScript           | Type safety                                      |
+| Vite                 | Development and production build tooling         |
+| Tailwind CSS         | Styling and responsive layout                    |
+| TanStack React Query | Unsplash API/server state and infinite scrolling |
+| InstantDB            | Real-time comments, reactions, and activity data |
+| Zustand              | Lightweight UI state management                  |
+| Emoji Picker React   | Emoji selection                                  |
+| Lucide React         | UI icons                                         |
+| Unsplash API         | Gallery image source                             |
+| Git & GitHub         | Version control and repository hosting           |
+
+## Architecture
+
+The application separates external API data from collaborative real-time interaction data.
+
+```text
+                         ┌─────────────────┐
+                         │   Unsplash API  │
+                         └────────┬────────┘
+                                  │
+                                  ▼
+                         ┌─────────────────┐
+                         │  React Query    │
+                         │ useInfiniteQuery │
+                         └────────┬────────┘
+                                  │
+                                  ▼
+                         ┌─────────────────┐
+                         │     Gallery     │
+                         │ ImageGrid/Card  │
+                         └─────────────────┘
+
+
+                         ┌─────────────────┐
+                         │    InstantDB    │
+                         └────────┬────────┘
+                                  │
+                    ┌─────────────┼─────────────┐
+                    ▼             ▼             ▼
+               Reactions      Comments      Activities
+                    │             │             │
+                    └─────────────┼─────────────┘
+                                  ▼
+                         Real-time UI updates
+```
+
+### Data responsibilities
+
+**Unsplash + React Query**
+
+Used for external gallery image data.
+
+**InstantDB**
+
+Used for collaborative application data:
+
+* Reactions
+* Comments
+* Activity events
+
+**Zustand**
+
+Used for local UI state such as:
+
+* Selected image
+* Image viewer visibility
+
+**localStorage**
+
+Used for the lightweight browser identity flow:
+
+* First name
+* Generated browser user ID
+
+## User Identity
+
+When the application is opened without a saved user name, the user is shown a simple onboarding screen.
+
+```text
+Open application
+      ↓
+Enter first name
+      ↓
+Continue
+      ↓
+Gallery
+```
+
+A browser-specific user ID is generated using `crypto.randomUUID()` and stored locally.
+
+The identity is then attached to interactions such as reactions and comments.
+
+The activity feed uses the stored first name to display meaningful activity such as:
+
+```text
+Aamir reacted ❤️ to an image.
+Aamir commented: "Great picture!"
+```
+
+This is intentionally a lightweight identity system rather than a full authentication system.
 
 ## Project Structure
 
 ```text
 src/
+├── assets/
+│
 ├── components/
 │   ├── activity/
 │   │   └── ActivityFeed.tsx
-│   └── gallery/
-│       ├── ImageCard.tsx
-│       ├── ImageGrid.tsx
-│       ├── ImageViewer.tsx
-│       └── ReactionBar.tsx
+│   │
+│   ├── gallery/
+│   │   ├── ImageCard.tsx
+│   │   ├── ImageGrid.tsx
+│   │   ├── ImageViewer.tsx
+│   │   └── ReactionBar.tsx
+│   │
+│   └── user/
+│       └── UserSetup.tsx
 │
 ├── hooks/
 │   ├── useActivities.ts
 │   ├── useComments.ts
 │   ├── useImages.ts
-│   └── useReactions.ts
+│   ├── useReactions.ts
+│   └── useUserIdentity.ts
 │
 ├── lib/
 │   ├── instant.ts
@@ -67,13 +178,306 @@ src/
 ├── types/
 │   └── types.ts
 │
-├── pages/
-├── utils/
 ├── App.tsx
+├── App.css
+├── index.css
 └── main.tsx
+
+instant.schema.ts
 ```
 
-## Setup Instructions
+## API Handling
+
+Unsplash is used as the external image API.
+
+The API logic is isolated inside:
+
+```text
+src/services/unsplash.ts
+```
+
+The service converts the Unsplash response into the application's internal `GalleryImage` structure instead of passing the complete Unsplash response throughout the UI.
+
+```text
+ImageGrid
+    ↓
+useImages
+    ↓
+TanStack React Query
+    ↓
+Unsplash Service
+    ↓
+Unsplash API
+```
+
+The gallery uses `useInfiniteQuery` to retrieve images page by page.
+
+An `IntersectionObserver` monitors the bottom of the gallery and triggers `fetchNextPage()` when another page is available.
+
+## InstantDB Data Model
+
+InstantDB stores the application's real-time interaction data separately from the Unsplash image data.
+
+### Comments
+
+Comments contain:
+
+```text
+imageId
+userId
+text
+createdAt
+```
+
+Comments are queried using the selected image ID, so the image viewer displays only comments belonging to that image.
+
+Users can delete their own comments by comparing the comment's `userId` with the current browser's generated user ID.
+
+### Reactions
+
+Reactions contain:
+
+```text
+imageId
+emoji
+userId
+createdAt
+```
+
+The application allows one active reaction per user per image.
+
+The behaviour is:
+
+```text
+No existing reaction
+        ↓
+Create reaction
+
+Same emoji selected
+        ↓
+Remove reaction
+
+Different emoji selected
+        ↓
+Replace previous reaction
+```
+
+Reaction counts are calculated from the synchronized reaction data.
+
+### Activities
+
+The activity entity stores global interaction events:
+
+```text
+imageId
+type
+emoji
+text
+userId
+userName
+createdAt
+```
+
+Activities are created when users react or comment.
+
+The Activity Feed subscribes to the activities data separately from image-specific comments and reactions, allowing new events to appear in real time.
+
+## Real-Time Architecture
+
+The application intentionally separates two different types of state.
+
+### External API state
+
+Handled by TanStack React Query:
+
+```text
+Unsplash API
+     ↓
+React Query
+     ↓
+Gallery
+```
+
+### Collaborative real-time state
+
+Handled by InstantDB:
+
+```text
+InstantDB
+   ├── Reactions
+   ├── Comments
+   └── Activities
+          ↓
+     Real-time UI
+```
+
+This separation keeps API fetching, local UI state, and collaborative data responsibilities clear.
+
+## Key React Decisions
+
+### Functional Components
+
+The application uses React functional components throughout the UI.
+
+Gallery, image viewer, reaction controls, comments, activity feed, and user setup are separated into focused components.
+
+### React Query for API State
+
+TanStack React Query is used for Unsplash because gallery images are external API/server state.
+
+`useInfiniteQuery` provides the foundation for infinite scrolling.
+
+### Zustand for UI State
+
+Zustand manages lightweight application UI state:
+
+```text
+selectedImageId
+isViewerOpen
+```
+
+This keeps viewer-related state separate from server and real-time data.
+
+### Local State
+
+React `useState` is used for component-level state such as the controlled comment input.
+
+### InstantDB for Real-Time State
+
+InstantDB is used for reactions, comments, and activities because these interactions need to synchronize between connected clients.
+
+### Separation of Concerns
+
+The project separates:
+
+* UI components
+* API services
+* React hooks
+* Real-time database access
+* Application UI state
+* Type definitions
+
+This keeps individual parts of the application focused on their responsibilities.
+
+## Infinite Scrolling
+
+The gallery uses an `IntersectionObserver` attached to an element at the bottom of the image list.
+
+When the element becomes visible and another page is available:
+
+```text
+IntersectionObserver
+        ↓
+fetchNextPage()
+        ↓
+React Query
+        ↓
+Unsplash
+        ↓
+More images
+```
+
+The pages returned by React Query are flattened before being passed to the gallery.
+
+## Challenges & Solutions
+
+### 1. Infinite Scrolling
+
+The initial gallery loaded a single page of images.
+
+The solution was to combine TanStack React Query's `useInfiniteQuery` with `IntersectionObserver`.
+
+### 2. Real-Time Synchronization
+
+Reactions and comments needed to appear for other users without manually refreshing the page.
+
+InstantDB was used as the real-time data layer so connected clients receive updates automatically.
+
+### 3. Preventing Multiple Reactions
+
+A user should have only one active reaction for an image.
+
+The reaction logic checks the current user's existing reaction before deciding whether to create, remove, or replace it.
+
+### 4. Comment Ownership
+
+Users can delete only their own comments.
+
+Each comment stores the generated browser user ID, which is compared against the current user's ID.
+
+### 5. Global Activity Feed
+
+The application needed a global activity feed independent of the currently selected image.
+
+A separate `activities` entity and `useActivities` hook were introduced for this purpose.
+
+### 6. User Identity
+
+The activity feed needed meaningful user attribution without implementing a full authentication system.
+
+A lightweight browser identity flow was implemented using:
+
+```text
+First name
++
+Generated browser user ID
++
+localStorage
+```
+
+### 7. Activity Feed Layout
+
+The activity feed is displayed beside the gallery on larger screens.
+
+```text
+┌──────────────────────────┬───────────────────┐
+│                          │                   │
+│        Gallery           │  Activity Feed    │
+│         ~70%             │       ~30%         │
+│                          │                   │
+│                          │ independent       │
+│                          │ scrolling          │
+└──────────────────────────┴───────────────────┘
+```
+
+This allows users to continue browsing the gallery while keeping recent activity visible.
+
+## Real-Time Testing
+
+Real-time functionality was tested using multiple browser tabs.
+
+Example:
+
+```text
+Tab A
+User adds reaction
+      ↓
+   InstantDB
+      ↓
+Tab B
+Reaction appears without refresh
+```
+
+The same approach was used to verify:
+
+* Reactions
+* Comments
+* Activity feed updates
+
+## Environment Variables
+
+Create a `.env.local` file in the project root:
+
+```env
+VITE_UNSPLASH_ACCESS_KEY=your_unsplash_access_key
+VITE_INSTANT_APP_ID=your_instant_app_id
+```
+
+The environment file is intentionally excluded from Git.
+
+Do not commit API credentials or other environment-specific secrets to the repository.
+
+## Getting Started
 
 ### 1. Clone the repository
 
@@ -90,20 +494,14 @@ npm install
 
 ### 3. Configure environment variables
 
-Create a `.env` file in the project root:
+Create `.env.local` and add:
 
 ```env
 VITE_UNSPLASH_ACCESS_KEY=your_unsplash_access_key
 VITE_INSTANT_APP_ID=your_instant_app_id
 ```
 
-The Unsplash access key is used by the application to request gallery images.
-
-The InstantDB application ID connects the frontend to the configured InstantDB application.
-
-Do not commit the `.env` file or expose private credentials in the repository.
-
-### 4. Start the development server
+### 4. Start development server
 
 ```bash
 npm run dev
@@ -111,319 +509,113 @@ npm run dev
 
 The application will be available at the local Vite development URL.
 
-## API Handling Strategy
+## Development Commands
 
-Unsplash is used as the external image API.
-
-The API logic is kept separate from the React components in:
-
-```text
-src/services/unsplash.ts
-```
-
-The service converts the Unsplash response into the application's `GalleryImage` structure instead of exposing the complete Unsplash response throughout the UI.
-
-React Query is responsible for handling the API request and server state.
-
-The gallery uses `useInfiniteQuery` to implement infinite scrolling.
-
-The page flow is:
-
-```text
-ImageGrid
-    ↓
-useImages
-    ↓
-React Query
-    ↓
-Unsplash API
-```
-
-Each page requests a fixed number of images. When the user reaches the bottom of the gallery, an `IntersectionObserver` triggers `fetchNextPage()`.
-
-The pages returned by React Query are flattened before being passed to the gallery.
-
-## InstantDB Schema & Usage
-
-InstantDB is used as the real-time data layer for user interactions.
-
-The application stores interaction data separately from the Unsplash image data.
-
-### Comments
-
-Comments contain information such as:
-
-```text
-imageId
-text
-userId
-createdAt
-```
-
-Comments are queried using the selected image ID, so the image viewer only displays comments related to that image.
-
-When a comment is created or deleted, InstantDB synchronizes the change with connected clients without requiring a manual refresh.
-
-### Reactions
-
-Reactions contain:
-
-```text
-imageId
-emoji
-userId
-createdAt
-```
-
-The application identifies the current browser/user using a generated user ID stored locally.
-
-The reaction logic ensures that a user has one active reaction per image:
-
-```text
-First click
-    ↓
-Add reaction
-
-Same reaction clicked again
-    ↓
-Remove reaction
-
-Different reaction selected
-    ↓
-Replace previous reaction
-```
-
-Reaction counts are calculated from the synchronized reaction data.
-
-### Activities
-
-The activity feed stores global interaction events such as:
-
-```text
-imageId
-type
-emoji
-text
-createdAt
-```
-
-Activity records are created for interactions and are queried separately from image-specific comments and reactions.
-
-The Activity Feed subscribes to InstantDB data, allowing new activity to appear in real time.
-
-## Real-Time Architecture
-
-The application separates external API data from real-time interaction data.
-
-```text
-                    ┌─────────────────┐
-                    │   Unsplash API  │
-                    └────────┬────────┘
-                             │
-                             ▼
-                    ┌─────────────────┐
-                    │  React Query    │
-                    └────────┬────────┘
-                             │
-                             ▼
-                    ┌─────────────────┐
-                    │     Gallery     │
-                    └─────────────────┘
-
-
-                    ┌─────────────────┐
-                    │    InstantDB    │
-                    └────────┬────────┘
-                             │
-             ┌───────────────┼───────────────┐
-             ▼               ▼               ▼
-        Reactions        Comments        Activities
-             │               │               │
-             └───────────────┼───────────────┘
-                             ▼
-                    Real-time UI updates
-```
-
-This separation allows React Query to handle external API/server data while InstantDB handles collaborative real-time interaction state.
-
-## Key React Decisions
-
-### Functional Components
-
-The application uses React functional components throughout.
-
-Gallery, image viewer, reaction bar, comments, and activity feed functionality are separated into individual components.
-
-### React Query for API State
-
-React Query is used for Unsplash API data because the gallery data is server/API state.
-
-`useInfiniteQuery` is used because the gallery supports infinite scrolling.
-
-### Local State
-
-`useState` is used for UI state such as the currently selected image and controlled comment input.
-
-For example, the selected image is represented by an image ID:
-
-```text
-selectedImageId
-```
-
-This keeps the UI state small and focused.
-
-### InstantDB for Real-Time State
-
-InstantDB is used for reactions, comments, and activities because these pieces of data need to synchronize between multiple users.
-
-### Controlled Inputs
-
-Comment input is controlled through React state.
-
-The current comment text is stored in state and cleared after a successful comment mutation.
-
-### Separation of Concerns
-
-The project separates:
-
-* UI components
-* API services
-* React hooks
-* Real-time database access
-* Application state
-* Type definitions
-
-This keeps individual components focused on their responsibilities.
-
-### Infinite Scrolling
-
-An `IntersectionObserver` watches an invisible element at the bottom of the gallery.
-
-When it becomes visible and another page is available, `fetchNextPage()` loads more images.
-
-## Challenges & Solutions
-
-### 1. Implementing Infinite Scrolling
-
-The initial gallery loaded only one page of images.
-
-The solution was to use React Query's `useInfiniteQuery` together with `IntersectionObserver`.
-
-The observer detects when the user reaches the bottom and requests the next page.
-
-### 2. Real-Time Synchronization
-
-The application needed reactions and comments to appear for another user without refreshing.
-
-InstantDB was used as the real-time data layer so connected clients automatically receive updates.
-
-The implementation was tested using multiple browser tabs.
-
-### 3. Preventing Multiple Reactions From the Same User
-
-A user should have one active reaction per image.
-
-The reaction logic checks whether the current user already has a reaction for that image.
-
-The behaviour is:
-
-* No existing reaction → create one
-* Same emoji → remove it
-* Different emoji → replace the existing reaction
-
-### 4. Comment Ownership
-
-Comments can be deleted by their creator.
-
-The comment stores the user's generated ID, allowing the application to determine whether the current user owns the comment before displaying the delete action.
-
-### 5. Global Activity Feed
-
-The gallery and image-specific interactions needed to remain separate from the global feed.
-
-A separate `activities` entity and `useActivities` hook were introduced so the feed can subscribe to global interactions independently.
-
-### 6. Activity Feed Layout
-
-Initially, the activity feed was placed below the gallery.
-
-Because the gallery uses infinite scrolling, the feed would continuously move farther down the page.
-
-The final design uses a desktop two-column layout:
-
-```text
-Gallery                  Activity Feed
-~70%                     ~30%
-```
-
-The feed has its own scrolling area, allowing users to browse images while continuing to see recent activity.
-
-## Real-Time Testing
-
-The real-time functionality was tested using multiple browser tabs.
-
-For example:
-
-```text
-Tab A
-User adds reaction
-        ↓
-     InstantDB
-        ↓
-Tab B
-Reaction appears without refresh
-```
-
-The same approach was used to verify comments and activity feed updates.
-
-## What I Would Improve With More Time
-
-* Add a dedicated emoji picker instead of relying on a fixed set of emojis.
-* Add a more user-friendly identity system with generated usernames or colors.
-* Add subtle animations when new activity appears in the feed.
-* Improve the visual design of the activity feed and image interactions.
-* Add stronger conflict-handling behaviour for simultaneous interactions.
-* Improve automated testing for reactions, comments, infinite scrolling, and real-time synchronization.
-* Deploy the application and perform final multi-device real-time testing.
-
-## Development
-
-Start the development server:
+### Start development server
 
 ```bash
 npm run dev
 ```
 
-Build the production application:
+### Run ESLint
+
+```bash
+npm run lint
+```
+
+### Create production build
 
 ```bash
 npm run build
 ```
 
-Preview the production build:
+### Preview production build
 
 ```bash
 npm run preview
 ```
 
+## Production Readiness
+
+Before deployment, the project should pass:
+
+```bash
+npm run lint
+npm run build
+```
+
+The production build is generated in:
+
+```text
+dist/
+```
+
+## Deployment
+
+The application can be deployed as a Vite single-page application on a static hosting platform.
+
+Required environment variables must be configured in the deployment platform:
+
+```text
+VITE_UNSPLASH_ACCESS_KEY
+VITE_INSTANT_APP_ID
+```
+
+After deployment, verify:
+
+* User setup works
+* Gallery images load
+* Infinite scrolling works
+* Image viewer works
+* Emoji picker works
+* Reactions synchronize
+* Comments synchronize
+* Activity feed updates
+* User names appear in activity
+* Production environment variables are correctly configured
+
+## Future Improvements
+
+Potential improvements for a production-scale version include:
+
+* Full authentication instead of browser-based identity
+* Automated unit and integration tests
+* Better conflict handling for simultaneous interactions
+* Activity feed pagination or virtualization for large datasets
+* Image loading and caching optimizations
+* Improved accessibility and keyboard navigation
+* More advanced error recovery and retry handling
+* Monitoring and production observability
+
 ## Assignment Requirements Covered
 
-The implementation covers the main assignment requirements:
+The implementation covers the main application requirements:
 
 * React functional components
+* TypeScript
 * Tailwind CSS
 * Unsplash API
-* Scrollable image gallery
+* Responsive image gallery
 * Infinite scrolling
 * Focused image view
 * Emoji reactions
+* Emoji picker
+* One reaction per user per image
+* Reaction replacement/removal behaviour
 * Real-time reaction synchronization
 * Real-time comments
+* Comment ownership and deletion
 * Global real-time activity feed
-* Separation of gallery and feed logic
+* User identity
+* User-name attribution in activity feed
+* Separation of gallery and activity feed logic
 * Controlled comment input
 * Loading and error handling
 * Async/await
 * InstantDB real-time data layer
+* TanStack React Query
+* Zustand UI state management
 
-The remaining deployment and final verification steps should be completed before submission.
+## License
+
+This project was created as a technical assignment and portfolio project.

@@ -25,8 +25,7 @@ const ActivityFeed = () => {
         {activities.map((activity) => (
           <div
             key={activity.id}
-            className="rounded-lg bg-white p-4 shadow"
-          >
+            className="activity-enter rounded-lg bg-white p-4 shadow"          >
             {activity.type === "reaction" && (
               <p>
                 {activity.userName ?? "Someone"} reacted {activity.emoji} to an image.

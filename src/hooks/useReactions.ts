@@ -1,7 +1,8 @@
 import { id } from "@instantdb/react";
 import { db } from "../lib/instant";
+import { useUserIdentity } from "./useUserIdentity";
 
-const USER_NAME_KEY = "gallery-user-name";
+
 
 const getUserId = () => {
   const existingUserId = localStorage.getItem("gallery-user-id");
@@ -19,7 +20,8 @@ const getUserId = () => {
 
 export const useReactions = (imageId: string) => {
   const userId = getUserId();
-  const userName = localStorage.getItem(USER_NAME_KEY) ?? "Someone";
+  const { userName: storedUserName } = useUserIdentity();
+  const userName = storedUserName ?? "Someone";
   const { data, isLoading, error } = db.useQuery({
     reactions: {
       $: {

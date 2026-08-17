@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useUserIdentity } from "./useUserIdentity";
 import { id } from "@instantdb/react";
 import { db } from "../lib/instant";
 
-const USER_NAME_KEY = "gallery-user-name";
+
+
 const getUserId = () => {
   const existingUserId = localStorage.getItem("gallery-user-id");
 
@@ -21,8 +23,8 @@ export const useComments = (imageId: string) => {
   const [commentText, setCommentText] = useState("");
 
   const userId = getUserId();
-  const userName =
-  localStorage.getItem(USER_NAME_KEY) ?? "Someone";
+  const { userName: storedUserName } = useUserIdentity();
+  const userName = storedUserName ?? "Someone";
 
   const { data, isLoading, error } = db.useQuery({
     comments: {

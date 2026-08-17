@@ -1,24 +1,22 @@
+import { useEffect } from "react";
 import UserSetup from "./components/user/UserSetup";
 import { useUserIdentity } from "./hooks/useUserIdentity";
 import { useAppStore } from "./store/appStore";
 import ActivityFeed from "./components/activity/ActivityFeed";
-import { useEffect } from "react";
 import { useImages } from "./hooks/useImages";
 import ImageGrid from "./components/gallery/ImageGrid";
 import ImageViewer from "./components/gallery/ImageViewer";
 
 function App() {
-    const { userName } = useUserIdentity();
+  const { userName } = useUserIdentity();
 
-  
-    const {
+  const {
     selectedImageId,
     isViewerOpen,
     setSelectedImageId,
     setViewerOpen,
   } = useAppStore();
 
-  
   const {
     data,
     isLoading,
@@ -28,7 +26,6 @@ function App() {
     hasNextPage,
     isFetchingNextPage,
   } = useImages();
-
 
   const images = data?.pages.flatMap((page) => page) ?? [];
 
@@ -53,9 +50,11 @@ function App() {
       observer.disconnect();
     };
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
-    if (!userName) {
+
+  if (!userName) {
     return <UserSetup />;
   }
+
   if (isLoading) {
     return (
       <main className="p-8">
@@ -88,21 +87,16 @@ function App() {
       </h1>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[7fr_3fr]">
-        {/* Gallery - 70% */}
         <section>
           <ImageGrid
-    images={images}
-    onImageClick={(imageId) => {
-      setSelectedImageId(imageId);
-      setViewerOpen(true);
-    }}
-  />
-
-          {/* Infinite scroll trigger */}
-          <div
-            id="load-more"
-            className="h-10"
+            images={images}
+            onImageClick={(imageId) => {
+              setSelectedImageId(imageId);
+              setViewerOpen(true);
+            }}
           />
+
+          <div id="load-more" className="h-10" />
 
           {isFetchingNextPage && (
             <p className="py-4 text-center text-gray-500">
@@ -111,21 +105,20 @@ function App() {
           )}
         </section>
 
-        {/* Activity Feed - 30% */}
         <aside className="lg:sticky lg:top-6 lg:h-[calc(100vh-6rem)] lg:overflow-y-auto">
           <ActivityFeed />
         </aside>
       </div>
 
       {selectedImage && isViewerOpen && (
-  <ImageViewer
-    image={selectedImage}
-    onClose={() => {
-      setSelectedImageId(null);
-      setViewerOpen(false);
-    }}
-  />
-)}
+        <ImageViewer
+          image={selectedImage}
+          onClose={() => {
+            setSelectedImageId(null);
+            setViewerOpen(false);
+          }}
+        />
+      )}
     </main>
   );
 }
