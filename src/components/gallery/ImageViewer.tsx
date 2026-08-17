@@ -35,11 +35,13 @@ const ImageViewer = ({ image, onClose }: ImageViewerProps) => {
           ×
         </button>
 
+        <div className="flex justify-center">
         <img
           src={image.imageUrl}
           alt={image.description ?? "Gallery image"}
-          className="max-h-[60vh] w-auto object-contain"
+          className="max-h-[80vh] max-w-full object-contain"
         />
+      </div>
 
         {image.description && (
           <p className="p-4 text-sm text-gray-700">

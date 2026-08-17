@@ -1,13 +1,17 @@
+import { useAppStore } from "./store/appStore";
 import ActivityFeed from "./components/activity/ActivityFeed";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useImages } from "./hooks/useImages";
 import ImageGrid from "./components/gallery/ImageGrid";
 import ImageViewer from "./components/gallery/ImageViewer";
 
 function App() {
-  const [selectedImageId, setSelectedImageId] = useState<string | null>(
-    null,
-  );
+    const {
+    selectedImageId,
+    isViewerOpen,
+    setSelectedImageId,
+    setViewerOpen,
+  } = useAppStore();
 
   const {
     data,
@@ -78,9 +82,12 @@ function App() {
         {/* Gallery - 70% */}
         <section>
           <ImageGrid
-            images={images}
-            onImageClick={setSelectedImageId}
-          />
+    images={images}
+    onImageClick={(imageId) => {
+      setSelectedImageId(imageId);
+      setViewerOpen(true);
+    }}
+  />
 
           {/* Infinite scroll trigger */}
           <div
@@ -101,12 +108,15 @@ function App() {
         </aside>
       </div>
 
-      {selectedImage && (
-        <ImageViewer
-          image={selectedImage}
-          onClose={() => setSelectedImageId(null)}
-        />
-      )}
+      {selectedImage && isViewerOpen && (
+  <ImageViewer
+    image={selectedImage}
+    onClose={() => {
+      setSelectedImageId(null);
+      setViewerOpen(false);
+    }}
+  />
+)}
     </main>
   );
 }
