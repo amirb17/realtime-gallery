@@ -1,20 +1,37 @@
 import { useState } from "react";
 import { useUserIdentity } from "../../hooks/useUserIdentity";
+import { userNameSchema } from "../../validation/userSchema";
 
 const UserSetup = () => {
   const { saveUserName } = useUserIdentity();
-  const [name, setName] = useState("");
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const [name, setName] = useState("");
+  const [error, setError] = useState("");
+
+  const handleSubmit = (
+    event: React.FormEvent<HTMLFormElement>,
+  ) => {
     event.preventDefault();
 
-    const trimmedName = name.trim();
+    const result = userNameSchema.safeParse(name);
 
-    if (!trimmedName) {
+    if (!result.success) {
+      setError(result.error.issues[0].message);
       return;
     }
 
-    saveUserName(trimmedName);
+    setError("");
+    saveUserName(result.data);
+  };
+
+  const handleChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    setName(event.target.value);
+
+    if (error) {
+      setError("");
+    }
   };
 
   return (
@@ -42,17 +59,28 @@ const UserSetup = () => {
           id="first-name"
           type="text"
           value={name}
-          onChange={(event) => setName(event.target.value)}
+          onChange={handleChange}
           placeholder="Enter your first name"
           maxLength={30}
           autoFocus
-          className="mb-4 w-full rounded-lg border px-4 py-3 outline-none focus:ring-2"
+          className={`w-full rounded-lg border px-4 py-3 outline-none transition focus:ring-2 ${
+            error
+              ? "border-red-500 focus:ring-red-200"
+              : "border-gray-300 focus:ring-gray-200"
+          }`}
         />
+
+        {error && (
+          <p className="mt-2 text-sm text-red-600">
+            {error}
+          </p>
+        )}
 
         <button
           type="submit"
           disabled={!name.trim()}
-          className="w-full rounded-lg bg-black px-4 py-3 font-medium text-white hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"        >
+          className="mt-4 w-full cursor-pointer rounded-lg bg-black px-4 py-3 font-medium text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
+        >
           Continue
         </button>
       </form>
