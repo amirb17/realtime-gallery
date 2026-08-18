@@ -1,3 +1,4 @@
+import GallerySkeleton from "./components/gallery/GallerySkeleton";
 import { useEffect } from "react";
 import UserSetup from "./components/user/UserSetup";
 import { useUserIdentity } from "./hooks/useUserIdentity";
@@ -57,8 +58,18 @@ function App() {
 
   if (isLoading) {
     return (
-      <main className="flex min-h-screen items-center justify-center">
-        <p>Loading images...</p>
+      <main className="h-screen overflow-hidden bg-gray-50">
+        <header className="flex h-[55px] shrink-0 items-center justify-center bg-black">
+          <h1 className="text-[20px] font-bold tracking-tight text-white">
+            Realtime Gallery
+          </h1>
+        </header>
+
+        <div className="h-[calc(100vh-55px)] overflow-hidden">
+          <section className="h-full overflow-hidden px-3 py-4 sm:px-6 sm:py-6 lg:w-[70%]">
+            <GallerySkeleton />
+          </section>
+        </div>
       </main>
     );
   }
@@ -83,14 +94,14 @@ function App() {
   return (
     <main className="h-screen overflow-hidden bg-gray-50">
       {/* Header */}
-      <header className="flex h-24 shrink-0 items-center justify-center border-b border-gray-200 bg-white">
-        <h1 className="text-4xl font-black tracking-tight text-gray-950">
+      <header className="flex h-[55px] shrink-0 items-center justify-center bg-black px-3 text-white sm:px-6 lg:px-8">
+        <h1 className="text-[20px] font-bold tracking-tight text-white">
           Realtime Gallery
         </h1>
       </header>
 
       {/* Main workspace */}
-      <div className="relative h-[calc(100vh-6rem)]">
+      <div className="relative h-[calc(100vh-55px)]">
         {/* Gallery */}
         <section
           className="
@@ -100,7 +111,6 @@ function App() {
             py-4
             sm:px-6
             sm:py-6
-
             lg:h-full
             lg:w-[70%]
             lg:px-6
@@ -128,16 +138,17 @@ function App() {
         <aside
           className="
             hidden
-
-            lg:fixed
+            lg:absolute
             lg:right-0
-            lg:top-24
+            lg:top-0
             lg:block
-            lg:h-[calc(100vh-6rem)]
+            lg:h-full
             lg:w-[30%]
+            lg:min-h-0
             lg:overflow-hidden
             lg:px-6
-            lg:py-6
+            lg:pt-6
+            lg:pb-2
           "
         >
           <ActivityFeed />
@@ -160,7 +171,6 @@ function App() {
             px-3
             py-3
             shadow-[0_-4px_20px_rgba(0,0,0,0.08)]
-
             lg:hidden
           "
         >

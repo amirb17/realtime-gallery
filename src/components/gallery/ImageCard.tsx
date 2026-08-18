@@ -1,18 +1,27 @@
-
+import { useState } from "react";
 import type { ImageCardProps } from "../../types/types";
 import ReactionBar from "./ReactionBar";
 
 const ImageCard = ({ image, onClick }: ImageCardProps) => {
+  const [isLoaded, setIsLoaded] = useState(false);
+
   return (
     <article
-      className="cursor-pointer overflow-hidden rounded-lg bg-white shadow transition-transform duration-300 ease-out hover:scale-[1.02] hover:shadow-lg"
+      className="cursor-pointer overflow-hidden rounded-lg bg-white shadow transition-transform duration-300 hover:scale-[1.02]"
       onClick={onClick}
     >
-      <div className="h-64 w-full overflow-hidden">
+      <div className="relative h-64 w-full overflow-hidden bg-gray-200">
+        {!isLoaded && (
+          <div className="absolute inset-0 animate-pulse bg-gray-200" />
+        )}
+
         <img
           src={image.imageUrl}
           alt={image.description ?? "Gallery image"}
-          className="h-full w-full object-cover"
+          onLoad={() => setIsLoaded(true)}
+          className={`h-64 w-full object-cover transition-opacity duration-500 ${
+            isLoaded ? "opacity-100" : "opacity-0"
+          }`}
         />
       </div>
 
@@ -22,4 +31,3 @@ const ImageCard = ({ image, onClick }: ImageCardProps) => {
 };
 
 export default ImageCard;
-

@@ -29,7 +29,6 @@ const ActivityFeed = () => {
 
   return (
     <section className="flex h-full min-h-0 flex-col">
-      {/* Activity Feed Header */}
       <h2
         className="
           mb-2
@@ -45,13 +44,13 @@ const ActivityFeed = () => {
         Activity Feed
       </h2>
 
-      {/* Scrollable Activity List */}
       <div
         className="
           min-h-0
           flex-1
           space-y-2
           overflow-y-auto
+          pb-1
           pr-1
           sm:space-y-3
           sm:pr-2
@@ -96,4 +95,3 @@ const ActivityFeed = () => {
 };
 
 export default ActivityFeed;
-

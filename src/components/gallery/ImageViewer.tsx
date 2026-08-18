@@ -49,18 +49,12 @@ className="absolute right-4 top-4 cursor-pointer rounded-full bg-black px-3 py-1
         {/* Scrollable content */}
         <div className="image-viewer-scroll max-h-[90vh] overflow-y-auto">
           <div className="flex justify-center">
-  <img
-    src={image.imageUrl}
-    alt={image.description ?? "Gallery image"}
-    className="block max-h-[80vh] w-full object-contain"
-  />
-</div>
-
-          {image.description && (
-            <p className="p-4 text-sm text-gray-700">
-              {image.description}
-            </p>
-          )}
+          <img
+              src={image.imageUrl}
+              alt={image.description ?? "Gallery image"}
+              className="block max-h-[80vh] w-full object-contain"
+              />
+            </div>
 
           <ReactionBar imageId={image.id} />
 
@@ -89,7 +83,7 @@ className="absolute right-4 top-4 cursor-pointer rounded-full bg-black px-3 py-1
                     <button
                       type="button"
                       onClick={() => deleteComment(comment.id)}
-className="ml-3 cursor-pointer text-sm text-red-600 hover:underline"                    >
+                      className="ml-3 cursor-pointer text-sm text-red-600 hover:underline"                    >
                       Delete
                     </button>
                   )}
@@ -112,10 +106,11 @@ className="ml-3 cursor-pointer text-sm text-red-600 hover:underline"            
               <button
                 type="button"
                 onClick={handleSubmit}
-                className="rounded-lg bg-black px-4 py-2 text-white transition hover:bg-gray-800"
+                className="cursor-pointer rounded bg-black px-4 py-2 text-white transition hover:bg-gray-800 active:scale-95"
               >
                 Comment
               </button>
+             
             </div>
           </div>
         </div>
